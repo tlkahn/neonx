@@ -5,13 +5,11 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
-import android.net.http.SslError;
 import android.os.Bundle;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.annotation.NonNull;
 import android.view.MenuItem;
-import android.webkit.SslErrorHandler;
 import android.webkit.WebResourceRequest;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
@@ -42,20 +40,30 @@ public class MainActivity extends AppCompatActivity {
 
         @Override
         public boolean onNavigationItemSelected(@NonNull MenuItem item) {
+
             switch (item.getItemId()) {
+
                 case R.id.navigation_home:
                     mWebView.loadUrl("https://yahoo.com");
                     return true;
                 case R.id.navigation_dashboard:
-                    mWebView.loadUrl("https://qq.com");
+                    mWebView.loadUrl("https://stackoverflow.com");
                     return true;
                 case R.id.navigation_notifications:
-                    mWebView.loadUrl("https://taobao.com");
+                    mWebView.loadUrl("https://stackexchange.com");
                     return true;
             }
             return false;
         }
     };
+
+    private class MyBrowser extends WebViewClient {
+        @Override
+        public boolean shouldOverrideUrlLoading(WebView view, String url) {
+            view.loadUrl(url);
+            return false;
+        }
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -67,11 +75,14 @@ public class MainActivity extends AppCompatActivity {
         WebSettings webSettings = mWebView.getSettings();
         webSettings.setMixedContentMode(WebSettings.MIXED_CONTENT_ALWAYS_ALLOW);
         webSettings.setDomStorageEnabled(true);
+//        mWebView.getSettings().setLoadsImagesAutomatically(true);
+//        mWebView.getSettings().setJavaScriptEnabled(true);
+//        mWebView.setScrollBarStyle(View.SCROLLBARS_INSIDE_OVERLAY);
+//        mWebView.setWebViewClient(new MyBrowser());
         mWebView.setWebViewClient(new WebViewClient() {
             @Override
             public boolean shouldOverrideUrlLoading(WebView view, WebResourceRequest request) {
-                mWebView.loadUrl("https://baidu.com");
-                return true;
+                return false;
             }
         });
         if (haveNetworkConnection()) {
@@ -79,12 +90,13 @@ public class MainActivity extends AppCompatActivity {
         }
         else {
             new AlertDialog.Builder(this)
-                .setTitle("Closing application")
+                .setTitle("You are not connected to internet.")
                 .setMessage("Are you sure you want to exit?")
                 .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
-
+                        finishAffinity();
+                        System.exit(0);
                     }
                 }).setNegativeButton("No", null).show();
         }
